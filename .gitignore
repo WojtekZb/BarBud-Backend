@@ -39,3 +39,4 @@ out/
 ### local secrets ###
 .env
 application-local.properties
+application.properties

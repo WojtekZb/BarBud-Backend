@@ -1,9 +1,16 @@
 package com.barbud.barbudbackend.responses;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+@Getter
+@AllArgsConstructor
 public class LoginResponse {
-    public int id;
-    public String accessToken;
-    public int access_expiresIn;
-    public String refreshToken;
-    public int refresh_expiresIn;
+    private int userId;
+    private String accessToken;
+    private LocalDateTime accessExpiresIn;
+    private String refreshToken;
+    private LocalDateTime refreshExpiresIn;
 }
