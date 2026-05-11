@@ -64,6 +64,22 @@ public class JwtService {
         return extractAllClaims(token).getSubject();
     }
 
+    public boolean isTokenValid(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+
+            Date expiration = claims.getExpiration();
+            String email = claims.getSubject();
+
+            return email != null &&
+                    expiration != null &&
+                    expiration.after(new Date());
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public Integer extractUserId(String token) {
         return extractAllClaims(token).get("userId", Integer.class);
     }

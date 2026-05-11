@@ -8,7 +8,7 @@ public interface IAuthRepo {
     Optional<String> passwordLookup(String email);
     int userIdLookup(String email);
 
-    String register(String email, String passwordHash);
+    String register(String email, String username, String passwordHash);
 
     String saveRefreshToken(String email, String refreshTokenHash, LocalDateTime refreshTokenExpiry);
 

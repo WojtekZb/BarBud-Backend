@@ -3,6 +3,7 @@ package com.barbud.barbudbackend.controllers;
 
 import com.barbud.barbudbackend.requests.LoginRequest;
 import com.barbud.barbudbackend.requests.RefreshRequest;
+import com.barbud.barbudbackend.requests.RegisterRequest;
 import com.barbud.barbudbackend.responses.LoginResponse;
 import com.barbud.barbudbackend.services.AuthService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,13 +30,18 @@ public class AuthController {
         return response;
     }
 
-    @PostMapping("auth/register")
-    public LoginResponse Register(@RequestBody LoginRequest request){
+    @PostMapping("/auth/register")
+    public LoginResponse register(@RequestBody RegisterRequest request) {
         String step1 = authService.Register(request);
-        if (step1 == "User added"){
-            LoginResponse response = authService.Login(request);
-            return response;
+
+        if ("User added".equals(step1)) {
+            LoginRequest loginRequest = new LoginRequest(
+                    request.email,
+                    request.password
+            );
+            return authService.Login(loginRequest);
         }
-        else return null;
+
+        return null;
     }
 }

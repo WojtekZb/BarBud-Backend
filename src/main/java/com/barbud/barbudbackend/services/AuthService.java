@@ -3,6 +3,7 @@ package com.barbud.barbudbackend.services;
 import com.barbud.barbudbackend.interfaces.IAuthRepo;
 import com.barbud.barbudbackend.requests.LoginRequest;
 import com.barbud.barbudbackend.requests.RefreshRequest;
+import com.barbud.barbudbackend.requests.RegisterRequest;
 import com.barbud.barbudbackend.responses.LoginResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,18 +46,18 @@ public class AuthService {
     }
 
     public LoginResponse Login(LoginRequest request){
-        String userPass = authRepo.passwordLookup(request.email).orElse(null);
+        String userPass = authRepo.passwordLookup(request.getEmail()).orElse(null);
 
-        if (passwordEncoder.matches(request.password, userPass)){
-            int userId = authRepo.userIdLookup(request.email);
+        if (passwordEncoder.matches(request.getPassword(), userPass)){
+            int userId = authRepo.userIdLookup(request.getEmail());
 
-            String accessToken = jwtService.generateAccessToken(userId, request.email);
-            String refreshToken = jwtService.generateRefreshToken(userId, request.email);
+            String accessToken = jwtService.generateAccessToken(userId, request.getEmail());
+            String refreshToken = jwtService.generateRefreshToken(userId, request.getEmail());
 
             LocalDateTime refreshTokenExpiry = LocalDateTime.now().plusDays(30);
             LocalDateTime accessTokenExpiry = LocalDateTime.now().plusHours(1);
 
-            authRepo.saveRefreshToken(request.email, refreshToken, refreshTokenExpiry);
+            authRepo.saveRefreshToken(request.getEmail(), refreshToken, refreshTokenExpiry);
 
             return new LoginResponse(
                     userId,
@@ -69,10 +70,10 @@ public class AuthService {
         else return null;
     }
 
-    public String Register(LoginRequest request){
+    public String Register(RegisterRequest request){
         if (passwordValidation(request.password)) {
             String hashPass = passwordEncoder.encode(request.password);
-            return authRepo.register(request.email, hashPass);
+            return authRepo.register(request.email, request.username, hashPass);
         }
         else return "User couldnt be added.";
     }

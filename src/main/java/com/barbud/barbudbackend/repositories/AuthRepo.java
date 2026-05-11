@@ -1,7 +1,6 @@
 package com.barbud.barbudbackend.repositories;
 
 import com.barbud.barbudbackend.interfaces.IAuthRepo;
-import com.barbud.barbudbackend.requests.LoginRequest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,14 +51,14 @@ public class AuthRepo implements IAuthRepo {
     }
 
     @Override
-    public String register(String email, String passwordHash) {
+    public String register(String email,String username, String passwordHash) {
         String sql = """
-            INSERT INTO users (email, password_hash)
-            VALUES (?, ?)
+            INSERT INTO users (email, username, password_hash)
+            VALUES (?, ?, ?)
             """;
 
         try {
-            int rowsAffected = jdbcTemplate.update(sql, email, passwordHash);
+            int rowsAffected = jdbcTemplate.update(sql, email, username, passwordHash);
 
             if (rowsAffected > 0) {
                 return "User added";
