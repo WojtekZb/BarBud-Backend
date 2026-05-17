@@ -1,5 +1,4 @@
 package com.barbud.barbudbackend.controllers;
-//TODO refresh, login, register
 
 import com.barbud.barbudbackend.requests.LoginRequest;
 import com.barbud.barbudbackend.requests.RefreshRequest;
