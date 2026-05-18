@@ -1,0 +1,31 @@
+services:
+  barbud-db:
+    image: postgres:17
+    container_name: barbud-db
+    environment:
+      POSTGRES_DB: barbud_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - barbud_postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+
+  barbud-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: barbud-backend
+    depends_on:
+      - barbud-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://barbud-db:5432/barbud_app
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8080:8080"
+
+volumes:
+  barbud_postgres_data:

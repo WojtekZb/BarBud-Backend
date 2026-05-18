@@ -5,6 +5,7 @@ import com.barbud.barbudbackend.requests.LoginRequest;
 import com.barbud.barbudbackend.requests.RefreshRequest;
 import com.barbud.barbudbackend.requests.RegisterRequest;
 import com.barbud.barbudbackend.responses.LoginResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
