@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class LoginResponse {
     private int userId;
+    private String username;
     private String accessToken;
     private LocalDateTime accessExpiresIn;
     private String refreshToken;

@@ -51,6 +51,7 @@ public class AuthService {
 
         if (passwordEncoder.matches(request.getPassword(), userPass)){
             int userId = authRepo.userIdLookup(request.getEmail());
+            String username = authRepo.usernameLookup(request.getEmail()).orElse(null);
 
             String accessToken = jwtService.generateAccessToken(userId, request.getEmail());
             String refreshToken = jwtService.generateRefreshToken(userId, request.getEmail());
@@ -62,6 +63,7 @@ public class AuthService {
 
             return new LoginResponse(
                     userId,
+                    username,
                     accessToken,
                     accessTokenExpiry,
                     refreshToken,
@@ -83,6 +85,7 @@ public class AuthService {
 
         String email = jwtService.extractEmail(request.refreshToken);
         Integer userId = jwtService.extractUserId(request.refreshToken);
+        String username = authRepo.usernameLookup(email).orElse(null);
 
         if (email == null || userId == null) {
             return null;
@@ -113,6 +116,7 @@ public class AuthService {
 
         return new LoginResponse(
                 userId,
+                username,
                 AccessToken,
                 accessExpiry,
                 RefreshToken,

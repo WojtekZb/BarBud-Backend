@@ -6,6 +6,9 @@ import java.util.Optional;
 public interface IAuthRepo {
 
     Optional<String> passwordLookup(String email);
+
+    Optional<String> usernameLookup(String email);
+
     int userIdLookup(String email);
 
     String register(String email, String username, String passwordHash);

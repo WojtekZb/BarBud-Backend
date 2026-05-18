@@ -36,6 +36,22 @@ public class AuthRepo implements IAuthRepo {
     }
 
     @Override
+    public Optional<String> usernameLookup(String email) {
+        String sql = """
+            SELECT username
+            FROM users
+            WHERE LOWER(email) = LOWER(?)
+            """;
+
+        try {
+            String username = jdbcTemplate.queryForObject(sql, String.class, email);
+            return Optional.ofNullable(username);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public int userIdLookup(String email) {
         String sql = """
             SELECT id
