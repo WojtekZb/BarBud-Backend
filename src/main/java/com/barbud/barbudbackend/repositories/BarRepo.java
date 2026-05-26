@@ -120,14 +120,21 @@ public class BarRepo implements IBarRepo {
     public List<BarResponse> getAllBarsByUserId(Long userId) {
         return jdbcTemplate.query(
                 """
-                SELECT id, name
-                FROM bars
-                WHERE user_id = ?
-                ORDER BY id
+                SELECT 
+                    b.id,
+                    b.name,
+                    COUNT(bi.ingredient_id) AS amount_ingredients
+                FROM bars b
+                LEFT JOIN bar_ingredients bi
+                    ON b.id = bi.bar_id
+                WHERE b.user_id = ?
+                GROUP BY b.id, b.name
+                ORDER BY b.id
                 """,
                 (rs, rowNum) -> new BarResponse(
                         rs.getLong("id"),
-                        rs.getString("name")
+                        rs.getString("name"),
+                        rs.getLong("amount_ingredients")
                 ),
                 userId
         );
@@ -140,14 +147,21 @@ public class BarRepo implements IBarRepo {
 
         BarResponse bar = jdbcTemplate.queryForObject(
                 """
-                SELECT id, name
-                FROM bars
-                WHERE id = ?
-                AND user_id = ?
+                SELECT 
+                    b.id,
+                    b.name,
+                    COUNT(bi.ingredient_id) AS amount_ingredients
+                FROM bars b
+                LEFT JOIN bar_ingredients bi
+                    ON b.id = bi.bar_id
+                WHERE b.id = ?
+                AND b.user_id = ?
+                GROUP BY b.id, b.name
                 """,
                 (rs, rowNum) -> new BarResponse(
                         rs.getLong("id"),
-                        rs.getString("name")
+                        rs.getString("name"),
+                        rs.getLong("amount_ingredients")
                 ),
                 barId,
                 userId

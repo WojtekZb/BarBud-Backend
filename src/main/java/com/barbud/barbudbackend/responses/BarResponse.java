@@ -8,4 +8,5 @@ import lombok.Getter;
 public class BarResponse {
     private Long id;
     private String name;
+    private Long amountIngredients;
 }
