@@ -46,7 +46,7 @@ public class AuthService {
         return hasCapital && hasNumber && hasSpecial;
     }
 
-    public LoginResponse Login(LoginRequest request){
+    public LoginResponse login(LoginRequest request){
         String userPass = authRepo.passwordLookup(request.getEmail()).orElse(null);
 
         if (passwordEncoder.matches(request.getPassword(), userPass)){
@@ -73,18 +73,18 @@ public class AuthService {
         else return null;
     }
 
-    public String Register(RegisterRequest request){
-        if (passwordValidation(request.password)) {
-            String hashPass = passwordEncoder.encode(request.password);
-            return authRepo.register(request.email, request.username, hashPass);
+    public String register(RegisterRequest request){
+        if (passwordValidation(request.getPassword())) {
+            String hashPass = passwordEncoder.encode(request.getPassword());
+            return authRepo.register(request.getEmail(), request.getUsername(), hashPass);
         }
         else return "User couldnt be added.";
     }
 
-    public LoginResponse Refresh(RefreshRequest request){
+    public LoginResponse refresh(RefreshRequest request){
 
-        String email = jwtService.extractEmail(request.refreshToken);
-        Integer userId = jwtService.extractUserId(request.refreshToken);
+        String email = jwtService.extractEmail(request.getRefreshToken());
+        Integer userId = jwtService.extractUserId(request.getRefreshToken());
         String username = authRepo.usernameLookup(email).orElse(null);
 
         if (email == null || userId == null) {
@@ -103,7 +103,7 @@ public class AuthService {
             return null;
         }
 
-        if (!request.refreshToken.equals(savedRefreshToken)) {
+        if (!request.getRefreshToken().equals(savedRefreshToken)) {
             return null;
         }
 

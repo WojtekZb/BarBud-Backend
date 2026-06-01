@@ -1,5 +1,10 @@
 package com.barbud.barbudbackend.requests;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public class RefreshRequest {
-    public String refreshToken;
+    private String refreshToken;
 }

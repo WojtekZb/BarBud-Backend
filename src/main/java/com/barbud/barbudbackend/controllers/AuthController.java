@@ -19,26 +19,25 @@ public class AuthController {
     }
 
     @PostMapping("auth/refresh")
-    public LoginResponse Refresh(@RequestBody RefreshRequest request){
-        return authService.Refresh(request);
+    public LoginResponse refresh(@RequestBody RefreshRequest request){
+        return authService.refresh(request);
     }
 
     @PostMapping("auth/login")
-    public LoginResponse Login(@RequestBody LoginRequest request){
-        LoginResponse response = authService.Login(request);
-        return response;
+    public LoginResponse login(@RequestBody LoginRequest request){
+        return authService.login(request);
     }
 
     @PostMapping("/auth/register")
     public LoginResponse register(@RequestBody RegisterRequest request) {
-        String step1 = authService.Register(request);
+        String step1 = authService.register(request);
 
         if ("User added".equals(step1)) {
             LoginRequest loginRequest = new LoginRequest(
-                    request.email,
-                    request.password
+                    request.getEmail(),
+                    request.getPassword()
             );
-            return authService.Login(loginRequest);
+            return authService.login(loginRequest);
         }
 
         return null;
