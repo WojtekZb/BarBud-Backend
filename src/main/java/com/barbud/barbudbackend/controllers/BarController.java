@@ -25,8 +25,8 @@ public class BarController {
     }
 
     @GetMapping("/bar/ingredients")
-    public List<Ingredients> AllIngredients() {
-        return barService.GetAllIngredients();
+    public List<Ingredients> allIngredients() {
+        return barService.getAllIngredients();
     }
 
     @PostMapping("/bar/create")

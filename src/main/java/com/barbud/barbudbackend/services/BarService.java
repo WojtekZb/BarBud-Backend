@@ -17,7 +17,7 @@ public class BarService {
         this.barRepo = barRepo;
     }
 
-    public List<Ingredients> GetAllIngredients() {
+    public List<Ingredients> getAllIngredients() {
         return barRepo.allIngredients();
     }
 
