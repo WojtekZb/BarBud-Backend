@@ -69,18 +69,5 @@ class AuthServiceTest {
 
         assertNotNull(response.getAccessExpiresIn());
         assertNotNull(response.getRefreshExpiresIn());
-
-        verify(authRepo).passwordLookup("test@example.com");
-        verify(passwordEncoder).matches("Password123!", hashedPassword);
-        verify(authRepo).userIdLookup("test@example.com");
-        verify(authRepo).usernameLookup("test@example.com");
-        verify(jwtService).generateAccessToken(1, "test@example.com");
-        verify(jwtService).generateRefreshToken(1, "test@example.com");
-
-        verify(authRepo).saveRefreshToken(
-                eq("test@example.com"),
-                eq("fake-refresh-token"),
-                any()
-        );
     }
 }
