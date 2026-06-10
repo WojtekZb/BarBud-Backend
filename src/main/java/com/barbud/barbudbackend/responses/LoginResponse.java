@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class LoginResponse {
+    private String message;
     private int userId;
     private String username;
     private String accessToken;

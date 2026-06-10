@@ -32,14 +32,22 @@ public class AuthController {
     public LoginResponse register(@RequestBody RegisterRequest request) {
         String step1 = authService.register(request);
 
-        if ("User added".equals(step1)) {
-            LoginRequest loginRequest = new LoginRequest(
-                    request.getEmail(),
-                    request.getPassword()
+        if (!"User added".equals(step1)) {
+            return new LoginResponse(
+                    step1,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
             );
-            return authService.login(loginRequest);
         }
 
-        return null;
+        LoginRequest loginRequest = new LoginRequest(
+                request.getEmail(),
+                request.getPassword()
+        );
+        return authService.login(loginRequest);
     }
 }
