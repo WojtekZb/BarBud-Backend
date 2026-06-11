@@ -96,37 +96,13 @@ public class AuthService {
         Integer userId = jwtService.extractUserId(request.getRefreshToken());
         String username = authRepo.usernameLookup(email).orElse(null);
 
-        if (email == null || userId == null) {
-            return new LoginResponse(
-                    "email or password invalid",
-                    0,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-            );
-        }
-
         String savedRefreshToken = authRepo.refreshTokenLookup(email).orElse(null);
-
-        if (savedRefreshToken == null) {
-            return new LoginResponse(
-                    "User has no saved token",
-                    0,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-            );
-        }
 
         LocalDateTime savedRefreshTokenExpiry = authRepo.refreshTokenExpiryLookup(email).orElse(null);
 
-        if (savedRefreshTokenExpiry == null || savedRefreshTokenExpiry.isBefore(LocalDateTime.now())) {
+        if (savedRefreshTokenExpiry.isBefore(LocalDateTime.now())) {
             return new LoginResponse(
-                    "User has no saved token",
+                    "Refresh token expitred",
                     0,
                     null,
                     null,

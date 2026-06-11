@@ -56,6 +56,7 @@ public class BarRepo implements IBarRepo {
     }
 
     public boolean barNameExistsForUserExceptCurrentBar(Long userId, Long barId, String barName) {
+
         Boolean exists = jdbcTemplate.queryForObject(
                 """
                 SELECT EXISTS (
@@ -94,12 +95,7 @@ public class BarRepo implements IBarRepo {
     }
 
     @Transactional
-    public Long createBarWithIngredients(Long userId, String barName, List<Long> ingredientIds) {
-        String cleanedBarName = barName.trim();
-
-        if (barNameExistsForUser(userId, cleanedBarName)) {
-            throw new IllegalArgumentException("You already have a bar with this name");
-        }
+    public String createBarWithIngredients(Long userId, String barName, List<Long> ingredientIds) {
 
         Long barId = jdbcTemplate.queryForObject(
                 """
@@ -109,12 +105,12 @@ public class BarRepo implements IBarRepo {
                 """,
                 Long.class,
                 userId,
-                cleanedBarName
+                barName
         );
 
         addIngredientsToBar(barId, ingredientIds);
 
-        return barId;
+        return "Bar added.";
     }
 
     public List<BarResponse> getAllBarsByUserId(Long userId) {
@@ -141,9 +137,6 @@ public class BarRepo implements IBarRepo {
     }
 
     public BarDetailsResponse getBarDetails(Long userId, Long barId) {
-        if (!barBelongsToUser(userId, barId)) {
-            throw new IllegalArgumentException("Bar not found");
-        }
 
         BarResponse bar = jdbcTemplate.queryForObject(
                 """
@@ -185,6 +178,7 @@ public class BarRepo implements IBarRepo {
         );
 
         return new BarDetailsResponse(
+                "Bar details.",
                 bar.getId(),
                 bar.getName(),
                 ingredients
@@ -192,16 +186,7 @@ public class BarRepo implements IBarRepo {
     }
 
     @Transactional
-    public void updateBar(Long userId, Long barId, String newName, List<Long> ingredientIds) {
-        if (!barBelongsToUser(userId, barId)) {
-            throw new IllegalArgumentException("Bar not found");
-        }
-
-        String cleanedName = newName.trim();
-
-        if (barNameExistsForUserExceptCurrentBar(userId, barId, cleanedName)) {
-            throw new IllegalArgumentException("You already have a bar with this name");
-        }
+    public String updateBar(Long userId, Long barId, String newName, List<Long> ingredientIds) {
 
         jdbcTemplate.update(
                 """
@@ -210,7 +195,7 @@ public class BarRepo implements IBarRepo {
                 WHERE id = ?
                 AND user_id = ?
                 """,
-                cleanedName,
+                newName,
                 barId,
                 userId
         );
@@ -224,12 +209,11 @@ public class BarRepo implements IBarRepo {
         );
 
         addIngredientsToBar(barId, ingredientIds);
+
+        return "Bar Updated.";
     }
 
     private void addIngredientsToBar(Long barId, List<Long> ingredientIds) {
-        if (ingredientIds == null || ingredientIds.isEmpty()) {
-            return;
-        }
 
         List<Long> uniqueIngredientIds = ingredientIds.stream()
                 .distinct()

@@ -5,15 +5,15 @@ import com.barbud.barbudbackend.requests.CreateBarRequest;
 import com.barbud.barbudbackend.requests.GetBarsRequest;
 import com.barbud.barbudbackend.requests.UpdateBarRequest;
 import com.barbud.barbudbackend.responses.Ingredients;
+import com.barbud.barbudbackend.responses.MessageResponse;
 import com.barbud.barbudbackend.services.BarService;
-import org.springframework.http.ResponseEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import com.barbud.barbudbackend.responses.BarResponse;
 import com.barbud.barbudbackend.responses.BarDetailsResponse;
 
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class BarController {
@@ -30,50 +30,24 @@ public class BarController {
     }
 
     @PostMapping("/bar/create")
-    public ResponseEntity<?> createBar(@RequestBody CreateBarRequest request) {
-
-        Long barId = barService.createBarWithIngredients(
-                request.getUserId(),
-                request.getName(),
-                request.getIngredientIds()
-        );
-
-        return ResponseEntity.status(201).body(Map.of(
-                "id", barId,
-                "message", "Bar created successfully"
-        ));
+    public MessageResponse createBar(@Valid @RequestBody CreateBarRequest request) {
+        String response = barService.createBarWithIngredients(request);
+        return new MessageResponse(response);
     }
 
     @PostMapping("/bar/my-bars")
-    public ResponseEntity<List<BarResponse>> getMyBars(@RequestBody GetBarsRequest request) {
-        List<BarResponse> bars = barService.getAllBarsByUserId(
-                request.getUserId()
-        );
-
-        return ResponseEntity.ok(bars);
+    public List<BarResponse> getMyBars(@Valid @RequestBody GetBarsRequest request) {
+        return barService.getAllBarsByUserId(request);
     }
 
     @PostMapping("/bar/details")
-    public ResponseEntity<BarDetailsResponse> getBarDetails(@RequestBody BarDetailsRequest request) {
-        BarDetailsResponse bar = barService.getBarDetails(
-                request.getUserId(),
-                request.getBarId()
-        );
-
-        return ResponseEntity.ok(bar);
+    public BarDetailsResponse getBarDetails(@Valid @RequestBody BarDetailsRequest request) {
+        return barService.getBarDetails(request);
     }
 
     @PutMapping("/bar/update")
-    public ResponseEntity<?> updateBar(@RequestBody UpdateBarRequest request) {
-        barService.updateBar(
-                request.getUserId(),
-                request.getBarId(),
-                request.getName(),
-                request.getIngredientIds()
-        );
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Bar updated successfully"
-        ));
+    public MessageResponse updateBar(@Valid @RequestBody UpdateBarRequest request) {
+        String response = barService.updateBar(request);
+        return new MessageResponse(response);
     }
 }
