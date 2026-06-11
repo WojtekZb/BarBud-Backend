@@ -100,7 +100,7 @@ public class AuthService {
 
         LocalDateTime savedRefreshTokenExpiry = authRepo.refreshTokenExpiryLookup(email).orElse(null);
 
-        if (savedRefreshTokenExpiry.isBefore(LocalDateTime.now())) {
+        if (savedRefreshTokenExpiry == null ||savedRefreshTokenExpiry.isBefore(LocalDateTime.now())) {
             return new LoginResponse(
                     "Refresh token expitred",
                     0,
