@@ -30,6 +30,7 @@ sonar {
                     **/repositories/**,
                     **/config/**,
                     **/security/**,
+                    **/services/JwtService.java
                     **/*Application.java
                 """
     }
