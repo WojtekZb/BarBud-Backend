@@ -10,8 +10,18 @@ import java.util.List;
 
 public interface IBarRepo {
     List<Ingredients> allIngredients();
-    Long createBarWithIngredients(Long userId, String barName, List<Long> ingredientIds);
+
+    boolean barNameExistsForUser(Long userId, String barName);
+
+    boolean barBelongsToUser(Long userId, Long barId);
+
+    boolean barNameExistsForUserExceptCurrentBar(Long userId, Long barId, String barName);
+
+    String createBarWithIngredients(Long userId, String barName, List<Long> ingredientIds);
+
     List<BarResponse> getAllBarsByUserId(Long userId);
+
     BarDetailsResponse getBarDetails(Long userId, Long barId);
-    void updateBar(Long userId, Long barId, String newName, List<Long> ingredientIds);
+
+    String updateBar(Long userId, Long barId, String newName, List<Long> ingredientIds);
 }

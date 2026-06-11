@@ -5,6 +5,7 @@ import com.barbud.barbudbackend.requests.RefreshRequest;
 import com.barbud.barbudbackend.requests.RegisterRequest;
 import com.barbud.barbudbackend.responses.LoginResponse;
 import com.barbud.barbudbackend.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,27 +20,35 @@ public class AuthController {
     }
 
     @PostMapping("auth/refresh")
-    public LoginResponse refresh(@RequestBody RefreshRequest request){
+    public LoginResponse refresh(@Valid @RequestBody RefreshRequest request){
         return authService.refresh(request);
     }
 
     @PostMapping("auth/login")
-    public LoginResponse login(@RequestBody LoginRequest request){
+    public LoginResponse login(@Valid @RequestBody LoginRequest request){
         return authService.login(request);
     }
 
     @PostMapping("/auth/register")
-    public LoginResponse register(@RequestBody RegisterRequest request) {
+    public LoginResponse register(@Valid @RequestBody RegisterRequest request) {
         String step1 = authService.register(request);
 
-        if ("User added".equals(step1)) {
-            LoginRequest loginRequest = new LoginRequest(
-                    request.getEmail(),
-                    request.getPassword()
+        if (!"User added".equals(step1)) {
+            return new LoginResponse(
+                    step1,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
             );
-            return authService.login(loginRequest);
         }
 
-        return null;
+        LoginRequest loginRequest = new LoginRequest(
+                request.getEmail(),
+                request.getPassword()
+        );
+        return authService.login(loginRequest);
     }
 }

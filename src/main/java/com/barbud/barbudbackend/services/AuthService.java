@@ -62,6 +62,7 @@ public class AuthService {
             authRepo.saveRefreshToken(request.getEmail(), refreshToken, refreshTokenExpiry);
 
             return new LoginResponse(
+                    "You're logged in",
                     userId,
                     username,
                     accessToken,
@@ -70,7 +71,15 @@ public class AuthService {
                     refreshTokenExpiry
             );
         }
-        else return null;
+        else return new LoginResponse(
+                "email or password invalid",
+                0,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
     }
 
     public String register(RegisterRequest request){
@@ -87,24 +96,32 @@ public class AuthService {
         Integer userId = jwtService.extractUserId(request.getRefreshToken());
         String username = authRepo.usernameLookup(email).orElse(null);
 
-        if (email == null || userId == null) {
-            return null;
-        }
-
         String savedRefreshToken = authRepo.refreshTokenLookup(email).orElse(null);
-
-        if (savedRefreshToken == null) {
-            return null;
-        }
 
         LocalDateTime savedRefreshTokenExpiry = authRepo.refreshTokenExpiryLookup(email).orElse(null);
 
-        if (savedRefreshTokenExpiry == null || savedRefreshTokenExpiry.isBefore(LocalDateTime.now())) {
-            return null;
+        if (savedRefreshTokenExpiry.isBefore(LocalDateTime.now())) {
+            return new LoginResponse(
+                    "Refresh token expitred",
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
         }
 
         if (!request.getRefreshToken().equals(savedRefreshToken)) {
-            return null;
+            return new LoginResponse(
+                    "Tokens don't match",
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
         }
 
         String AccessToken = jwtService.generateAccessToken(userId, email);
@@ -115,6 +132,7 @@ public class AuthService {
         authRepo.saveRefreshToken(email, RefreshToken, RefreshExpiry);
 
         return new LoginResponse(
+                "Tokens refreshed",
                 userId,
                 username,
                 AccessToken,

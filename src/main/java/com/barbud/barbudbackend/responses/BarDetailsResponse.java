@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class BarDetailsResponse {
+    private String message;
     private Long id;
     private String name;
     private List<BarIngredientsResponse> ingredients;
