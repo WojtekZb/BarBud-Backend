@@ -17,8 +17,8 @@ export const options = {
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:8080';
 
 const TEST_USER = {
-  email: __ENV.TEST_EMAIL || 'test@test.com',
-  password: __ENV.TEST_PASSWORD || 'Password123!',
+  email: __ENV.TEST_EMAIL || 'admin@example.com',
+  password: __ENV.TEST_PASSWORD || 'BorekILolek1!',
 };
 
 export function setup() {
@@ -48,11 +48,16 @@ export function setup() {
 
   return {
     accessToken: body.accessToken,
-    userId: body.id,
+    userId: body.userId,
   };
 }
 
 export default function (data) {
+
+  const MY_BARS_TEST = {
+    userId: data.userId
+  }
+
   const authHeaders = {
     headers: {
       Authorization: `Bearer ${data.accessToken}`,
@@ -67,9 +72,10 @@ export default function (data) {
     'ingredients response is fast': (res) => res.timings.duration < 500,
   });
 
-  const myBarsRes = http.get(
-    `${BASE_URL}/bar/my-bars?userId=${data.userId}`,
-    authHeaders
+  const myBarsRes = http.post(
+    `${BASE_URL}/bar/my-bars`,
+      JSON.stringify(MY_BARS_TEST),
+      authHeaders
   );
 
   check(myBarsRes, {
