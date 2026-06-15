@@ -52,7 +52,7 @@ public class AuthRepo implements IAuthRepo {
     }
 
     @Override
-    public int userIdLookup(String email) {
+    public Long userIdLookup(String email) {
         String sql = """
             SELECT id
             FROM users
@@ -60,9 +60,9 @@ public class AuthRepo implements IAuthRepo {
             """;
 
         try {
-            return jdbcTemplate.queryForObject(sql, Integer.class, email);
+            return jdbcTemplate.queryForObject(sql, Long.class, email);
         } catch (EmptyResultDataAccessException e) {
-            return -1;
+            return null;
         }
     }
 

@@ -47,15 +47,15 @@ class AuthServiceTest {
                 .thenReturn(true);
 
         when(authRepo.userIdLookup("test@example.com"))
-                .thenReturn(1);
+                .thenReturn(1L);
 
         when(authRepo.usernameLookup("test@example.com"))
                 .thenReturn(Optional.of("Wojtek"));
 
-        when(jwtService.generateAccessToken(1, "test@example.com"))
+        when(jwtService.generateAccessToken(1L, "test@example.com"))
                 .thenReturn("fake-access-token");
 
-        when(jwtService.generateRefreshToken(1, "test@example.com"))
+        when(jwtService.generateRefreshToken(1L, "test@example.com"))
                 .thenReturn("fake-refresh-token");
 
         // Act
@@ -65,7 +65,7 @@ class AuthServiceTest {
         assertNotNull(response);
 
         assertEquals("You're logged in", response.getMessage());
-        assertEquals(1, response.getUserId());
+        assertEquals(1L, response.getUserId());
         assertEquals("Wojtek", response.getUsername());
         assertEquals("fake-access-token", response.getAccessToken());
         assertEquals("fake-refresh-token", response.getRefreshToken());
@@ -97,7 +97,7 @@ class AuthServiceTest {
         assertNotNull(response);
 
         assertEquals("email or password invalid", response.getMessage());
-        assertEquals(0, response.getUserId());
+        assertNull(response.getUserId());
         assertNull(response.getUsername());
         assertNull(response.getAccessToken());
         assertNull(response.getAccessExpiresIn());
@@ -107,44 +107,42 @@ class AuthServiceTest {
 
     @Test
     void refresh_WithValidRefreshToken_ReturnsNewLoginResponse() {
-        // Arrange
+        //Arrange
         RefreshRequest request = new RefreshRequest("old-refresh-token");
 
         when(jwtService.extractEmail("old-refresh-token"))
-                .thenReturn("test@example.com");
+                .thenReturn("admin@example.com");
 
         when(jwtService.extractUserId("old-refresh-token"))
-                .thenReturn(1);
+                .thenReturn(1L);
 
-        when(authRepo.usernameLookup("test@example.com"))
-                .thenReturn(Optional.of("Wojtek"));
+        when(authRepo.usernameLookup("admin@example.com"))
+                .thenReturn(Optional.of("wojtek"));
 
-        when(authRepo.refreshTokenLookup("test@example.com"))
+        when(authRepo.refreshTokenLookup("admin@example.com"))
                 .thenReturn(Optional.of("old-refresh-token"));
 
-        when(authRepo.refreshTokenExpiryLookup("test@example.com"))
-                .thenReturn(Optional.of(LocalDateTime.now().plusDays(5)));
+        when(authRepo.refreshTokenExpiryLookup("admin@example.com"))
+                .thenReturn(Optional.of(LocalDateTime.now().plusDays(1)));
 
-        when(jwtService.generateAccessToken(1, "test@example.com"))
+        when(jwtService.generateAccessToken(1L, "admin@example.com"))
                 .thenReturn("new-access-token");
 
-        when(jwtService.generateRefreshToken(1, "test@example.com"))
+        when(jwtService.generateRefreshToken(1L, "admin@example.com"))
                 .thenReturn("new-refresh-token");
 
-        // Act
+        //Act
         LoginResponse response = authService.refresh(request);
 
-        // Assert
-        assertNotNull(response);
-
+        //Assert
         assertEquals("Tokens refreshed", response.getMessage());
-        assertEquals(1, response.getUserId());
-        assertEquals("Wojtek", response.getUsername());
+        assertEquals(1L, response.getUserId());
+        assertEquals("wojtek", response.getUsername());
         assertEquals("new-access-token", response.getAccessToken());
-        assertEquals("new-refresh-token", response.getRefreshToken());
-
         assertNotNull(response.getAccessExpiresIn());
+        assertEquals("new-refresh-token", response.getRefreshToken());
         assertNotNull(response.getRefreshExpiresIn());
+
     }
 
     @Test
@@ -156,7 +154,7 @@ class AuthServiceTest {
                 .thenReturn("test@example.com");
 
         when(jwtService.extractUserId("expired-refresh-token"))
-                .thenReturn(1);
+                .thenReturn(null);
 
         when(authRepo.usernameLookup("test@example.com"))
                 .thenReturn(Optional.of("Wojtek"));
@@ -174,7 +172,7 @@ class AuthServiceTest {
         assertNotNull(response);
 
         assertEquals("Refresh token expitred", response.getMessage());
-        assertEquals(0, response.getUserId());
+        assertNull(response.getUserId());
         assertNull(response.getUsername());
         assertNull(response.getAccessToken());
         assertNull(response.getAccessExpiresIn());

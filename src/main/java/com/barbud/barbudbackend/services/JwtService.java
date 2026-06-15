@@ -28,16 +28,16 @@ public class JwtService {
         this.refreshTokenExpirationMs = refreshTokenExpirationMs;
     }
 
-    public String generateAccessToken(Integer userId, String email) {
+    public String generateAccessToken(Long userId, String email) {
         return generateToken(userId, email, "access", accessTokenExpirationMs);
     }
 
-    public String generateRefreshToken(Integer userId, String email) {
+    public String generateRefreshToken(Long userId, String email) {
         return generateToken(userId, email, "refresh", refreshTokenExpirationMs);
     }
 
 
-    private String generateToken(Integer userId, String email, String tokenType, long expirationMs) {
+    private String generateToken(Long userId, String email, String tokenType, long expirationMs) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
 
@@ -80,7 +80,7 @@ public class JwtService {
         }
     }
 
-    public Integer extractUserId(String token) {
-        return extractAllClaims(token).get("userId", Integer.class);
+    public Long extractUserId(String token) {
+        return extractAllClaims(token).get("userId", Long.class);
     }
 }

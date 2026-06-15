@@ -36,7 +36,7 @@ public class AuthController {
         if (!"User added".equals(step1)) {
             return new LoginResponse(
                     step1,
-                    0,
+                    null,
                     null,
                     null,
                     null,

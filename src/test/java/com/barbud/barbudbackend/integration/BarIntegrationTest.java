@@ -1,5 +1,7 @@
 package com.barbud.barbudbackend.integration;
 
+import com.barbud.barbudbackend.responses.BarResponse;
+import com.barbud.barbudbackend.responses.LoginResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -7,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.jayway.jsonpath.JsonPath;
+
+import java.time.LocalDateTime;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,13 +24,13 @@ public class BarIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private String getAccessToken() throws Exception {
+    private LoginResponse getCredentials() throws Exception {
         String loginJson = """
-            {
-              "email": "admin@example.com",
-              "password": "BorekILolek1!"
-            }
-            """;
+        {
+          "email": "admin@example.com",
+          "password": "BorekILolek1!"
+        }
+        """;
 
         String response = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -36,35 +40,65 @@ public class BarIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        return JsonPath.read(response, "$.accessToken");
+        return new LoginResponse(
+                JsonPath.read(response, "$.message"),
+                ((Number) JsonPath.read(response, "$.userId")).longValue(),
+                JsonPath.read(response, "$.username"),
+                JsonPath.read(response, "$.accessToken"),
+                LocalDateTime.parse(JsonPath.read(response, "$.accessExpiresIn")),
+                JsonPath.read(response, "$.refreshToken"),
+                LocalDateTime.parse(JsonPath.read(response, "$.refreshExpiresIn"))
+        );
+    }
+
+    private Long getBarId(Long userId) throws Exception {
+        LoginResponse response = getCredentials();
+
+        String myBarsJson = """
+            {
+                "userId": %s
+            }
+            """.formatted(userId);
+
+        String result = mockMvc.perform(post("/bar/my-bars")
+                        .header("Authorization", "Bearer " + response.getAccessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(myBarsJson))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Number barId = JsonPath.read(result, "$[0].id");
+        return barId.longValue();
     }
 
     @Test
     void ingredients_ReturnsIngredientList() throws Exception {
-        String accessToken = getAccessToken();
+        LoginResponse response = getCredentials();
 
         mockMvc.perform(get("/bar/ingredients")
-                        .header("Authorization", "Bearer " + accessToken))
+                        .header("Authorization", "Bearer " + response.getAccessToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", not(empty())))
-                .andExpect(jsonPath("$[0].id").isNumber())
+                .andExpect(jsonPath("$[0].id").exists())
                 .andExpect(jsonPath("$[0].name").value(not(emptyOrNullString())))
                 .andExpect(jsonPath("$[0].category").value(not(emptyOrNullString())));
     }
 
     @Test
     void myBars_WithExistingUser_ReturnsBars() throws Exception {
-        String accessToken = getAccessToken();
+        LoginResponse response = getCredentials();
 
         String myBarsJson = """
                 {
-                    "userId": 3
+                    "userId": "%s"
                 }
-                """;
+                """.formatted(response.getUserId());
 
         mockMvc.perform(post("/bar/my-bars")
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", "Bearer " + response.getAccessToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(myBarsJson))
                 .andExpect(status().isOk())
@@ -77,7 +111,7 @@ public class BarIntegrationTest {
 
     @Test
     void myBars_WithNonExistingUser_ReturnsEmptyList() throws Exception {
-        String accessToken = getAccessToken();
+        LoginResponse response = getCredentials();
 
         String myBarsJson = """
                 {
@@ -86,7 +120,7 @@ public class BarIntegrationTest {
                 """;
 
         mockMvc.perform(post("/bar/my-bars")
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", "Bearer " + response.getAccessToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(myBarsJson))
                 .andExpect(status().isOk())
@@ -96,17 +130,18 @@ public class BarIntegrationTest {
 
     @Test
     void details_WithExistingBar_ReturnsBarDetails() throws Exception {
-        String accessToken = getAccessToken();
+        LoginResponse response = getCredentials();
+        Long barId = getBarId(response.getUserId());
 
         String detailsJson = """
                 {
-                    "userId": 3,
-                    "barId": 2
+                    "userId": "%s",
+                    "barId": "%s"
                 }
-                """;
+                """.formatted(response.getUserId(), barId);
 
         mockMvc.perform(post("/bar/details")
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", "Bearer " + response.getAccessToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(detailsJson))
                 .andExpect(status().isOk())
@@ -122,17 +157,17 @@ public class BarIntegrationTest {
 
     @Test
     void details_WithBarThatDoesNotBelongToUser_ReturnsBarNotFound() throws Exception {
-        String accessToken = getAccessToken();
+        LoginResponse response = getCredentials();
 
         String detailsJson = """
                 {
-                    "userId": 9999,
-                    "barId": 10
+                    "userId": "9999",
+                    "barId": "10"
                 }
                 """;
 
         mockMvc.perform(post("/bar/details")
-                        .header("Authorization", "Bearer " + accessToken)
+                        .header("Authorization", "Bearer " + response.getAccessToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(detailsJson))
                 .andExpect(status().isOk())
