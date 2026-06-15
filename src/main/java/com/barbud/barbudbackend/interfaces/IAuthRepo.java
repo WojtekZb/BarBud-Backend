@@ -9,7 +9,7 @@ public interface IAuthRepo {
 
     Optional<String> usernameLookup(String email);
 
-    int userIdLookup(String email);
+    Long userIdLookup(String email);
 
     String register(String email, String username, String passwordHash);
 

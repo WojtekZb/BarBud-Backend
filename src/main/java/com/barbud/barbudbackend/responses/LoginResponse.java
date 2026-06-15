@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class LoginResponse {
     private String message;
-    private int userId;
+    private Long userId;
     private String username;
     private String accessToken;
     private LocalDateTime accessExpiresIn;

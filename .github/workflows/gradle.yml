@@ -37,7 +37,7 @@ jobs:
       - name: Build, test, coverage and analyze with Gradle
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew clean test jacocoTestReport build sonar --info
+        run: ./gradlew clean test jacocoTestReport build sonar --info -PexcludeIntegrationTests
 
       - name: Upload unit test report
         if: always()

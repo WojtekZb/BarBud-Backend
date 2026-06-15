@@ -49,7 +49,7 @@ public class AuthService {
         String userPass = authRepo.passwordLookup(request.getEmail()).orElse(null);
 
         if (passwordEncoder.matches(request.getPassword(), userPass)){
-            int userId = authRepo.userIdLookup(request.getEmail());
+            Long userId = authRepo.userIdLookup(request.getEmail());
             String username = authRepo.usernameLookup(request.getEmail()).orElse(null);
 
             String accessToken = jwtService.generateAccessToken(userId, request.getEmail());
@@ -72,7 +72,7 @@ public class AuthService {
         }
         else return new LoginResponse(
                 "email or password invalid",
-                0,
+                null,
                 null,
                 null,
                 null,
@@ -92,7 +92,7 @@ public class AuthService {
     public LoginResponse refresh(RefreshRequest request){
 
         String email = jwtService.extractEmail(request.getRefreshToken());
-        Integer userId = jwtService.extractUserId(request.getRefreshToken());
+        Long userId = jwtService.extractUserId(request.getRefreshToken());
         String username = authRepo.usernameLookup(email).orElse(null);
 
         String savedRefreshToken = authRepo.refreshTokenLookup(email).orElse(null);
@@ -102,7 +102,7 @@ public class AuthService {
         if (savedRefreshTokenExpiry == null ||savedRefreshTokenExpiry.isBefore(LocalDateTime.now())) {
             return new LoginResponse(
                     "Refresh token expitred",
-                    0,
+                    null,
                     null,
                     null,
                     null,
@@ -114,7 +114,7 @@ public class AuthService {
         if (!request.getRefreshToken().equals(savedRefreshToken)) {
             return new LoginResponse(
                     "Tokens don't match",
-                    0,
+                    null,
                     null,
                     null,
                     null,
