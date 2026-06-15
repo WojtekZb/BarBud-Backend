@@ -63,6 +63,11 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+
+    if (project.hasProperty("excludeIntegrationTests")) {
+        exclude '**/integration/**'
+    }
+
     finalizedBy tasks.named('jacocoTestReport')
 }
 
