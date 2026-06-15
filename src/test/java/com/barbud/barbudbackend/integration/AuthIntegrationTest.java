@@ -1,5 +1,6 @@
 package com.barbud.barbudbackend.integration;
 
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,6 +18,25 @@ class AuthIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    private String getRefreshToken() throws Exception {
+        String loginJson = """
+            {
+              "email": "admin@example.com",
+              "password": "BorekILolek1!"
+            }
+            """;
+
+        String response = mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return JsonPath.read(response, "$.refreshToken");
+    }
 
     @Test
     void login_WithExistingUser_ReturnsLoginResponse() throws Exception {
@@ -64,11 +84,13 @@ class AuthIntegrationTest {
 
     @Test
     void refresh_WithCorrectRefreshToken_ReturnsLoginResponse() throws Exception {
+        String token = getRefreshToken();
+
         String refreshJson = """
-                {
-                    "refreshToken": 
-                }
-                """;
+            {
+                "refreshToken": "%s"
+            }
+            """.formatted(token);
 
         mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -86,16 +108,16 @@ class AuthIntegrationTest {
     @Test
     void refresh_WithInvalidRefreshToken_ReturnsErrorResponse() throws Exception {
         String refreshJson = """
-                {
-                    "refreshToken": "IncorrectRefrshToken"
-                }
-                """;
+                    {
+                        "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIyMjRiNmRjYi1kZGZhLTQ4OGYtYTU4Ni1hMDBiZGE3MjE3OTciLCJzdWIiOiJhZG1pbkBleGFtcGxlLmNvbSIsInVzZXJJZCI6MSwidG9rZW5UeXBlIjoicmVmcmVzaCIsImlhdCI6MTc4MTU0NDkzNSwiZXhwIjoxNzg0MTM2OTM1fQ.xWFMwiGd_nuwa3vLE1hybrJuZE-NNlM6Tzr0Pr_xx34"
+                    }
+                    """;
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(refreshJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Refresh token expitred"))
+                .andExpect(jsonPath("$.message").value("Tokens don't match"))
                 .andExpect(jsonPath("$.userId").value(0))
                 .andExpect(jsonPath("$.username").value(nullValue()))
                 .andExpect(jsonPath("$.accessToken").value(nullValue()))

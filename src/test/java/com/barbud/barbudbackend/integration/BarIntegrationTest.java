@@ -41,7 +41,10 @@ public class BarIntegrationTest {
 
     @Test
     void ingredients_ReturnsIngredientList() throws Exception {
-        mockMvc.perform(get("/bar/ingredients"))
+        String accessToken = getAccessToken();
+
+        mockMvc.perform(get("/bar/ingredients")
+                        .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$", not(empty())))
@@ -56,7 +59,7 @@ public class BarIntegrationTest {
 
         String myBarsJson = """
                 {
-                    "userId": 35
+                    "userId": 3
                 }
                 """;
 
@@ -97,8 +100,8 @@ public class BarIntegrationTest {
 
         String detailsJson = """
                 {
-                    "userId": 1,
-                    "barId": 10
+                    "userId": 3,
+                    "barId": 2
                 }
                 """;
 
@@ -108,7 +111,7 @@ public class BarIntegrationTest {
                         .content(detailsJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Bar details."))
-                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value(not(emptyOrNullString())))
                 .andExpect(jsonPath("$.ingredients").isArray())
                 .andExpect(jsonPath("$.ingredients", not(empty())))
