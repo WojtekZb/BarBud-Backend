@@ -22,8 +22,8 @@ class AuthIntegrationTest {
     void login_WithExistingUser_ReturnsLoginResponse() throws Exception {
         String loginJson = """
                 {
-                  "email": 
-                  "password": 
+                  "email": "admin@example.com",
+                  "password": "BorekILolek1!"
                 }
                 """;
 
@@ -54,6 +54,48 @@ class AuthIntegrationTest {
                         .content(loginJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("email or password invalid"))
+                .andExpect(jsonPath("$.userId").value(0))
+                .andExpect(jsonPath("$.username").value(nullValue()))
+                .andExpect(jsonPath("$.accessToken").value(nullValue()))
+                .andExpect(jsonPath("$.accessExpiresIn").value(nullValue()))
+                .andExpect(jsonPath("$.refreshToken").value(nullValue()))
+                .andExpect(jsonPath("$.refreshExpiresIn").value(nullValue()));
+    }
+
+    @Test
+    void refresh_WithCorrectRefreshToken_ReturnsLoginResponse() throws Exception {
+        String refreshJson = """
+                {
+                    "refreshToken": 
+                }
+                """;
+
+        mockMvc.perform(post("/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Tokens refreshed"))
+                .andExpect(jsonPath("$.userId").isNumber())
+                .andExpect(jsonPath("$.username").value(not(emptyOrNullString())))
+                .andExpect(jsonPath("$.accessToken").value(not(emptyOrNullString())))
+                .andExpect(jsonPath("$.accessExpiresIn").value(not(emptyOrNullString())))
+                .andExpect(jsonPath("$.refreshToken").value(not(emptyOrNullString())))
+                .andExpect(jsonPath("$.refreshExpiresIn").value(not(emptyOrNullString())));
+    }
+
+    @Test
+    void refresh_WithInvalidRefreshToken_ReturnsErrorResponse() throws Exception {
+        String refreshJson = """
+                {
+                    "refreshToken": "IncorrectRefrshToken"
+                }
+                """;
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Refresh token expitred"))
                 .andExpect(jsonPath("$.userId").value(0))
                 .andExpect(jsonPath("$.username").value(nullValue()))
                 .andExpect(jsonPath("$.accessToken").value(nullValue()))
