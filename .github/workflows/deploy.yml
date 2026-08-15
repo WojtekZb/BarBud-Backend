@@ -8,17 +8,12 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      - name: Deploy on VM
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          script: |
-            cd ~/apps/BarBudBackend
-            git pull origin main
-            docker compose up -d --build
-            docker image prune -f
+      - name: Deploy
+        run: |
+          cd ~/apps/BarBud-Backend
+          git pull origin main
+          docker compose up -d --build
+          docker image prune -f
