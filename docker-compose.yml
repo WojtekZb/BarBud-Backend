@@ -2,6 +2,7 @@ services:
   barbud-db:
     image: postgres:17
     container_name: barbud-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: barbud_app
       POSTGRES_USER: postgres
@@ -17,6 +18,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: barbud-backend
+    restart: unless-stopped
     depends_on:
       - barbud-db
     environment:
